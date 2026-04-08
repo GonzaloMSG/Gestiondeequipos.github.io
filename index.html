@@ -33,11 +33,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;f
 .tab-row{display:flex;gap:3px;margin-left:auto}
 .main{display:grid;grid-template-columns:210px 1fr;flex:1;min-height:0}
 @media(max-width:680px){
-  .main{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  .sidebar{height:auto;max-height:230px;position:static;border-right:none;border-bottom:0.5px solid var(--border1)}
-  .sidebar-body{max-height:140px}
-  .topbar{gap:4px;padding:6px 10px}
+  html,body{height:100%;overflow:hidden}
+  .app{display:flex;flex-direction:column;height:100%;height:100dvh;overflow:hidden}
+  .topbar{flex-shrink:0;gap:4px;padding:6px 10px;position:relative}
   .topbar-title{font-size:13px}
+  .main{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;grid-template-columns:unset}
+  .sidebar{flex-shrink:0;position:relative;height:auto;max-height:180px;border-right:none;border-bottom:1px solid var(--border2);background:var(--bg1);overflow:hidden}
+  .sidebar-body{max-height:90px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px}
+  .fields-grid{grid-template-columns:1fr!important}
 }
 .sidebar{border-right:0.5px solid var(--border1);display:flex;flex-direction:column;height:calc(100dvh - 49px);position:sticky;top:49px;overflow:hidden}
 .sidebar-header{padding:7px 10px;border-bottom:0.5px solid var(--border1);background:var(--bg2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -92,7 +96,7 @@ button:active{opacity:0.75}
 .metric-card{background:var(--bg2);border-radius:var(--radius-md);padding:8px 10px}
 .metric-label{font-size:10px;color:var(--text2);margin-bottom:2px}
 .metric-val{font-size:20px;font-weight:700;color:var(--text1)}
-.fields-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.fields-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;align-items:start}
 .tag{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:600}
 .section-title{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
 .saved-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
@@ -137,31 +141,6 @@ button:active{opacity:0.75}
 /* MOBILE BAR */
 @media(max-width:680px){
   .desktop-only{display:none!important}
-  /* Toda la app ocupa la pantalla sin scroll externo */
-  html,body{height:100%;overflow:hidden}
-  .app{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
-  /* topbar fijo arriba */
-  .topbar{flex-shrink:0}
-  /* sidebar fijo — no baja con el contenido */
-  .sidebar{
-    flex-shrink:0;
-    position:sticky;
-    top:0;
-    z-index:10;
-    height:auto;
-    max-height:185px;
-    border-right:none;
-    border-bottom:1px solid var(--border2);
-    background:var(--bg1);
-    overflow:hidden;
-  }
-  .sidebar-body{max-height:95px;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  /* main: flex column, sidebar arriba, content abajo scrolleable */
-  .main{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;grid-template-columns:unset}
-  /* solo el content scrollea */
-  .content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px}
-  .fields-grid{grid-template-columns:1fr!important}
-  /* mobile-bar pegada al fondo */
   .mobile-bar{display:flex;gap:5px;padding:8px 10px;border-top:0.5px solid var(--border1);background:var(--bg2);flex-wrap:wrap;justify-content:center;flex-shrink:0;z-index:15}
   .mobile-bar button{flex:1;min-width:0;font-size:11px;padding:8px 5px;min-height:36px}
 }
@@ -324,11 +303,48 @@ function launchCoin(){
 /* ARQUERO ALEATORIO */
 function randomGKRotation(teamKey){
   const team=S.teams[teamKey];
-  const allIds=[...(team.slots.A||[]),...(team.slots.M||[]),...(team.slots.T||[]),...(team.gk?[team.gk]:[]),...team.subs].filter(Boolean);
+  // Recolectar todos los IDs sin duplicados (slots + gk actual + subs)
+  const allIds=[...new Set([...(team.slots.A||[]),...(team.slots.M||[]),...(team.slots.T||[]),...(team.gk?[team.gk]:[]),...(team.subs||[])].filter(Boolean))];
   if(!allIds.length){alert('No hay jugadores en el equipo '+TEAM_COLORS[teamKey].name);return}
   const shuffled=shuffle(allIds);
   S.gkRotation[teamKey]=shuffled;
-  S.teams[teamKey].gk=shuffled[0];
+  const newGkId=shuffled[0];
+  const oldGkId=S.teams[teamKey].gk;
+
+  if(newGkId!==oldGkId){
+    // Buscar en qué slot está el nuevo arquero
+    let newGkRow=null, newGkIdx=null;
+    ['A','M','T'].forEach(row=>{
+      (S.teams[teamKey].slots[row]||[]).forEach((id,i)=>{
+        if(id===newGkId){newGkRow=row;newGkIdx=i;}
+      });
+    });
+    // Buscar en qué slot estaba el arquero anterior (si estaba en un slot)
+    let oldGkRow=null, oldGkIdx=null;
+    if(oldGkId){
+      ['A','M','T'].forEach(row=>{
+        (S.teams[teamKey].slots[row]||[]).forEach((id,i)=>{
+          if(id===oldGkId){oldGkRow=row;oldGkIdx=i;}
+        });
+      });
+    }
+    // Intercambiar: el nuevo arq sale del slot y el viejo arq entra en ese slot
+    if(newGkRow!==null){
+      if(oldGkId){
+        // Poner el arq anterior en el slot que dejó libre el nuevo
+        S.teams[teamKey].slots[newGkRow][newGkIdx]=oldGkId;
+      } else {
+        S.teams[teamKey].slots[newGkRow][newGkIdx]=null;
+      }
+    }
+    // Si el viejo arq estaba en subs, sacarlo de subs (ya fue al slot)
+    if(oldGkId && newGkRow!==null){
+      S.teams[teamKey].subs=S.teams[teamKey].subs.filter(id=>id!==oldGkId);
+    }
+    // Si el nuevo arq estaba en subs, sacarlo de subs
+    S.teams[teamKey].subs=S.teams[teamKey].subs.filter(id=>id!==newGkId);
+  }
+  S.teams[teamKey].gk=newGkId;
   const tc=TEAM_COLORS[teamKey];
   const overlay=document.createElement('div');
   overlay.className='modal-overlay';overlay.id='modal-overlay';
@@ -488,7 +504,9 @@ function renderFieldForTeam(teamKey){
   const rowsHtml=POS_KEYS.map(row=>{
     const cnt=sc[row];const ids=team.slots[row]||[];
     const slotsHtml=Array.from({length:cnt},(_,i)=>{
-      const pid=ids[i];const p=pid?playerById(pid):null;
+      const pid=ids[i];
+      // Si este jugador ya está asignado como arquero, no mostrarlo en el slot
+      const p=(pid && pid!==team.gk)?playerById(pid):null;
       if(p){
         const g=calcGlobal(p);const rotIdx=rotation.indexOf(p.id);
         return`<div class="player-slot occupied" style="border-color:${tc.main};background:${tc.main}28"
