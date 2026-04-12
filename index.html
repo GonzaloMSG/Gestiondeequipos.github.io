@@ -38,8 +38,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;f
   .topbar{flex-shrink:0;gap:4px;padding:6px 10px;position:relative}
   .topbar-title{font-size:13px}
   .main{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;grid-template-columns:unset}
-  .sidebar{flex-shrink:0;position:relative;height:auto;max-height:180px;border-right:none;border-bottom:1px solid var(--border2);background:var(--bg1);overflow:hidden}
-  .sidebar-body{max-height:90px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .sidebar{flex-shrink:0;position:relative;height:auto;max-height:200px;border-right:none;border-bottom:1px solid var(--border2);background:var(--bg1);overflow:hidden}
+  .sidebar-body{max-height:100px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px}
   .fields-grid{grid-template-columns:1fr!important}
 }
@@ -61,6 +61,924 @@ button:active{opacity:0.75}
 .btn-sm{padding:4px 9px;font-size:11px;min-height:28px}
 .tab{padding:6px 12px;font-size:12px;border-radius:var(--radius-md);border:0.5px solid var(--border2);cursor:pointer;background:var(--bg1);color:var(--text1);min-height:32px;touch-action:manipulation}
 .tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.mode-btn{padding:6px 10px;font-size:12px;border-radius:var(--radius-md);border:0.5px solid var(--border2);cursor:pointer;background:var(--bg1);color:var(--text1);min-height:32px}
+.mode-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* PLAYER CARD EN SIDEBAR */
+.pcard{border:0.5px solid var(--border1);border-radius:var(--radius-md);padding:7px 9px;margin-bottom:5px;background:var(--bg1);transition:border-color .12s,opacity .12s}
+.pcard.in-team{opacity:0.55}
+.pcard.no-asiste{opacity:0.35}
+.pcard-name{font-weight:600;font-size:12px;color:var(--text1)}
+.pcard-meta{font-size:10px;color:var(--text2);margin-top:1px}
+.pcard-row{display:flex;align-items:center;gap:7px}
+.pcard-actions{display:flex;align-items:center;gap:5px;margin-top:5px}
+.global-bar-wrap{height:4px;background:var(--bg3);border-radius:2px;margin-top:4px;overflow:hidden}
+.global-bar{height:100%;border-radius:2px;transition:width .3s}
+/* TOGGLE ASISTENCIA */
+.toggle-wrap{display:flex;align-items:center;gap:5px;flex-shrink:0;touch-action:manipulation}
+.toggle{position:relative;width:38px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--bg3);border-radius:11px;transition:.2s;border:0.5px solid var(--border2)}
+.toggle input:checked+.toggle-slider{background:var(--green);border-color:var(--green)}
+.toggle-slider:before{content:'';position:absolute;height:16px;width:16px;left:2px;bottom:2px;background:white;border-radius:50%;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,0.25)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px)}
+.toggle-label{font-size:10px;color:var(--text2);font-weight:500;white-space:nowrap}
+/* FIELD */
+.field-wrap{border-radius:var(--radius-md);overflow:hidden;border:0.5px solid var(--border2)}
+.field-header{padding:8px 10px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:space-between;color:#fff;gap:4px;flex-wrap:wrap}
+.field-body{position:relative;background:#246e24;padding:10px 8px 6px}
+.field-svg-lines{position:absolute;inset:0;pointer-events:none;opacity:0.18}
+.field-rows{display:flex;flex-direction:column;gap:7px;position:relative;z-index:1}
+.field-row{display:flex;gap:5px;justify-content:center;align-items:center}
+.field-row-label{font-size:9px;color:rgba(255,255,255,0.4);width:30px;text-align:right;flex-shrink:0}
+.player-slot{border:1.5px dashed rgba(255,255,255,0.28);border-radius:8px;min-width:66px;min-height:62px;display:flex;align-items:center;justify-content:center;transition:border-color .12s,background .12s;position:relative;touch-action:manipulation}
+.player-slot.drag-over{border-color:#fff;background:rgba(255,255,255,0.14)}
+.player-slot.occupied{border-style:solid}
+.player-chip{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 3px;width:100%;user-select:none}
+.chip-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.chip-name{font-size:9px;color:#fff;font-weight:500;text-align:center;line-height:1.2;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-global{font-size:9px;font-weight:700}
+.chip-gk-badge{font-size:8px;background:rgba(255,200,0,0.92);color:#412402;padding:1px 5px;border-radius:8px;font-weight:700}
+.chip-rotation{font-size:8px;background:rgba(255,255,255,0.2);color:#fff;padding:1px 4px;border-radius:6px;font-weight:500;margin-top:1px}
+.chip-remove{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;padding:0;line-height:1;touch-action:manipulation;min-height:unset;opacity:0;transition:opacity .12s}
+.player-slot:hover .chip-remove{opacity:1}
+@media(pointer:coarse){.chip-remove{opacity:1;width:20px;height:20px}}
+.subs-section{border-top:0.5px solid rgba(255,255,255,0.1);margin-top:5px;padding-top:5px}
+.sub-chip{display:inline-block;background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:3px 8px;font-size:9px;color:rgba(255,255,255,0.7);margin:2px;cursor:pointer;touch-action:manipulation}
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+@media(max-width:560px){.metrics-row{grid-template-columns:repeat(2,1fr)}}
+.metric-card{background:var(--bg2);border-radius:var(--radius-md);padding:8px 10px}
+.metric-label{font-size:10px;color:var(--text2);margin-bottom:2px}
+.metric-val{font-size:20px;font-weight:700;color:var(--text1)}
+.fields-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;align-items:start}
+.tag{display:inline-block;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:600}
+.section-title{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.saved-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.list-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.list-table th{font-size:10px;font-weight:700;color:var(--text2);text-align:left;padding:5px 5px;border-bottom:0.5px solid var(--border1);background:var(--bg2)}
+.list-table td{padding:5px 5px;border-bottom:0.5px solid var(--border1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list-table tr:hover td{background:var(--bg2)}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;z-index:1000;padding:0}
+@media(min-width:500px){.modal-overlay{align-items:center;padding:16px}}
+.modal-box{background:var(--bg1);border-radius:var(--radius-lg) var(--radius-lg) 0 0;width:100%;max-width:440px;max-height:92vh;overflow-y:auto;padding:18px 18px 24px;position:relative;-webkit-overflow-scrolling:touch}
+@media(min-width:500px){.modal-box{border-radius:var(--radius-lg);padding:20px}}
+.modal-handle{width:38px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px}
+@media(min-width:500px){.modal-handle{display:none}}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:14px;color:var(--text1)}
+.form-row{margin-bottom:11px}
+.form-row label{display:block;font-size:11px;color:var(--text2);margin-bottom:3px;font-weight:500}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-section{background:var(--bg2);border-radius:var(--radius-md);padding:10px;margin-bottom:11px}
+.stat-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.stat-row:last-child{margin-bottom:0}
+.stat-row label{width:65px;font-size:11px;color:var(--text2);flex-shrink:0;font-weight:500}
+.stat-row input[type=range]{flex:1;cursor:pointer;height:22px}
+.stat-val{width:30px;text-align:right;font-size:13px;font-weight:700;color:var(--text1)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:38px;margin-bottom:12px}
+.explain-item{display:flex;align-items:flex-start;gap:6px;padding:4px 0;border-bottom:0.5px solid var(--border1);font-size:11px}
+.explain-item:last-child{border-bottom:none}
+/* ROTATION */
+.rotation-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border1);font-size:12px}
+.rotation-item:last-child{border-bottom:none}
+.rotation-num{width:20px;height:20px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:var(--text2)}
+.rotation-num.first{background:var(--gold);color:#412402}
+/* COIN */
+.coin{width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;border:4px solid transparent;position:relative;flex-shrink:0;margin:0 auto}
+.coin-spinning{animation:coinFlip 0.75s ease-in-out infinite}
+.coin-result{animation:coinPop 0.35s ease-out forwards}
+@keyframes coinFlip{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(90deg) scale(0.8)}100%{transform:rotateY(0) scale(1)}}
+@keyframes coinPop{0%{transform:scale(0.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+/* ESTADÍSTICAS */
+.stats-section{display:flex;flex-direction:column;gap:10px}
+.match-card{background:var(--bg2);border-radius:var(--radius-md);padding:10px;border:0.5px solid var(--border1)}
+.match-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px;flex-wrap:wrap}
+.match-score{font-size:22px;font-weight:800;color:var(--text1);letter-spacing:-0.5px}
+.match-date{font-size:11px;color:var(--text3)}
+.goal-list{display:flex;flex-direction:column;gap:3px}
+.goal-item{display:flex;align-items:center;gap:7px;padding:5px 7px;background:var(--bg1);border-radius:6px;border:0.5px solid var(--border1)}
+.goal-player{font-size:12px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.goal-minute{font-size:11px;color:var(--text3);flex-shrink:0}
+.goal-team-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.goal-del{background:none;border:none;color:var(--text3);font-size:14px;padding:0 2px;min-height:unset;cursor:pointer;touch-action:manipulation;line-height:1}
+.player-stats-card{background:var(--bg2);border-radius:var(--radius-md);padding:10px;border:0.5px solid var(--border1)}
+.player-stats-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border1)}
+.player-stats-row:last-child{border-bottom:none}
+.player-stats-goals{font-size:18px;font-weight:800;color:var(--blue);min-width:30px;text-align:center}
+.stats-tabs{display:flex;gap:4px;margin-bottom:10px}
+.stats-tab{padding:5px 12px;font-size:11px;border-radius:20px;border:0.5px solid var(--border2);cursor:pointer;background:var(--bg1);color:var(--text1);touch-action:manipulation;min-height:28px}
+.stats-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* ADD GOAL BUTTON */
+.add-goal-btn{display:flex;align-items:center;gap:5px;padding:7px 10px;background:var(--bg1);border:0.5px dashed var(--border2);border-radius:var(--radius-md);cursor:pointer;font-size:12px;color:var(--text2);width:100%;touch-action:manipulation;min-height:36px;justify-content:center}
+.add-goal-btn:hover{background:var(--bg2);border-color:var(--blue);color:var(--blue)}
+/* ATTENDANCE BANNER */
+.attend-banner{background:var(--blue-l);border:0.5px solid var(--blue);border-radius:var(--radius-md);padding:8px 12px;font-size:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* MOBILE BAR */
+@media(max-width:680px){
+  .desktop-only{display:none!important}
+  .mobile-bar{display:flex;gap:5px;padding:8px 10px;border-top:0.5px solid var(--border1);background:var(--bg2);flex-wrap:wrap;justify-content:center;flex-shrink:0;z-index:15;overflow-x:auto}
+  .mobile-bar button{flex:1;min-width:0;font-size:11px;padding:8px 5px;min-height:38px}
+}
+@media(min-width:681px){.mobile-bar{display:none}}
+/* ERROR MSG */
+.error-msg{background:var(--red-l);color:var(--red-d);border:0.5px solid var(--red);border-radius:var(--radius-md);padding:7px 10px;font-size:12px;margin-bottom:8px;display:none}
+.error-msg.show{display:block}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+const TEAM_COLORS={A:{main:'#185FA5',light:'#E6F1FB',dark:'#0C447C',name:'Azul'},B:{main:'#A32D2D',light:'#FCEBEB',dark:'#791F1F',name:'Rojo'}};
+const POS_LABELS={A:'Adelante',M:'Medio',T:'Atrás'};
+const POS_KEYS=['A','M','T'];
+const AVATAR_COLS=['#185FA5','#0F6E56','#993C1D','#534AB7','#993556','#639922','#854F0B','#A32D2D'];
+const F5_SLOTS={A:2,M:1,T:1};
+const F7_SLOTS={A:2,M:2,T:2};
+
+let S={
+  players:loadStorage('fbv2_players')||defaultPlayers(),
+  mode:'F7',view:'field',
+  teams:emptyTeams(),
+  hasSplit:false,
+  dragPid:null,dragFrom:null,
+  search:'',posFilter:'',attendFilter:'all',
+  explanation:[],
+  savedTeams:loadStorage('fbv2_saved')||[],
+  weights:{
+    G:{A:0.35,M:0.30,T:0.25,Q:0.10},
+    A:{A:0.70,M:0.20,T:0.05,Q:0.05},
+    M:{A:0.15,M:0.60,T:0.20,Q:0.05},
+    T:{A:0.05,M:0.25,T:0.65,Q:0.05},
+    Q:{A:0.00,M:0.05,T:0.10,Q:0.85}
+  },
+  kickoff:null,
+  gkRotation:{A:[],B:[]},
+  // Estadísticas
+  matches:loadStorage('fbv2_matches')||[],
+  goals:loadStorage('fbv2_goals')||[],
+  currentMatchId:null,
+  statsSubView:'resumen',
+};
+
+function emptyTeams(){return{A:{slots:{A:[],M:[],T:[]},gk:null,subs:[]},B:{slots:{A:[],M:[],T:[]},gk:null,subs:[]}}}
+function loadStorage(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function saveStorage(){
+  localStorage.setItem('fbv2_players',JSON.stringify(S.players));
+  localStorage.setItem('fbv2_saved',JSON.stringify(S.savedTeams));
+  localStorage.setItem('fbv2_matches',JSON.stringify(S.matches));
+  localStorage.setItem('fbv2_goals',JSON.stringify(S.goals));
+}
+
+function defaultPlayers(){
+  return[
+    {id:'p1',n:'Carlos Méndez',d:'1',A:20,M:30,T:40,Q:88,pos:'T',pie:'Der',notas:'Buen arquero',asiste:true},
+    {id:'p2',n:'Diego Flores',d:'4',A:25,M:55,T:80,Q:10,pos:'T',pie:'Der',notas:'',asiste:true},
+    {id:'p3',n:'Matías Romero',d:'5',A:30,M:60,T:75,Q:5,pos:'T',pie:'Zur',notas:'',asiste:true},
+    {id:'p4',n:'Lucas García',d:'3',A:45,M:65,T:55,Q:0,pos:'T',pie:'Der',notas:'',asiste:true},
+    {id:'p5',n:'Andrés Suárez',d:'6',A:40,M:72,T:60,Q:0,pos:'M',pie:'Der',notas:'',asiste:true},
+    {id:'p6',n:'Fernando López',d:'8',A:65,M:78,T:40,Q:0,pos:'M',pie:'Der',notas:'',asiste:true},
+    {id:'p7',n:'Sebastián Ruiz',d:'10',A:80,M:70,T:20,Q:0,pos:'M',pie:'Zur',notas:'Capitán',asiste:true},
+    {id:'p8',n:'Nicolás Torres',d:'7',A:75,M:55,T:30,Q:0,pos:'A',pie:'Der',notas:'',asiste:true},
+    {id:'p9',n:'Rodrigo Jiménez',d:'11',A:70,M:50,T:25,Q:0,pos:'A',pie:'Zur',notas:'',asiste:true},
+    {id:'p10',n:'Pablo Martínez',d:'9',A:90,M:60,T:15,Q:0,pos:'A',pie:'Der',notas:'Goleador',asiste:true},
+    {id:'p11',n:'Tomás Vargas',d:'2',A:85,M:55,T:20,Q:0,pos:'A',pie:'Zur',notas:'',asiste:true},
+    {id:'p12',n:'Ramiro Castro',d:'12',A:50,M:60,T:50,Q:15,pos:'M',pie:'Der',notas:'Puede atajar',asiste:true}
+  ];
+}
+
+function calcGlobal(p){const w=S.weights.G;return Math.round(w.A*p.A+w.M*p.M+w.T*p.T+w.Q*p.Q)}
+function calcScore(p,pos){const w=S.weights[pos]||S.weights.M;return Math.round(w.A*p.A+w.M*p.M+w.T*p.T+w.Q*p.Q)}
+function getGlobalColor(g){return g>=75?'#3B6D11':g>=50?'#854F0B':'#A32D2D'}
+function getInitials(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+function getAvatarColor(id){return AVATAR_COLS[Math.abs([...id].reduce((a,c)=>a+c.charCodeAt(0),0))%AVATAR_COLS.length]}
+function getSlotCount(){return S.mode==='F5'?F5_SLOTS:F7_SLOTS}
+function playerById(id){return S.players.find(p=>p.id===id)}
+function allInTeamIds(){
+  const ids=new Set();
+  ['A','B'].forEach(t=>{
+    POS_KEYS.forEach(r=>(S.teams[t].slots[r]||[]).forEach(id=>id&&ids.add(id)));
+    if(S.teams[t].gk)ids.add(S.teams[t].gk);
+    S.teams[t].subs.forEach(id=>ids.add(id));
+  });
+  return ids;
+}
+function getTeamSum(t){
+  let s=0;
+  POS_KEYS.forEach(r=>(S.teams[t].slots[r]||[]).forEach(id=>{const p=playerById(id);if(p)s+=calcGlobal(p)}));
+  if(S.teams[t].gk){const p=playerById(S.teams[t].gk);if(p)s+=calcGlobal(p)}
+  return s;
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function genId(){return 'id'+Date.now()+Math.random().toString(36).slice(2,7)}
+
+/* ASISTENCIA */
+function toggleAsiste(pid){
+  S.players=S.players.map(p=>p.id===pid?{...p,asiste:!p.asiste}:p);
+  saveStorage();
+  renderSidebarOnly();
+  // Si estaba en equipo y ahora no asiste, no lo sacamos (puede haber sido dividido antes)
+}
+
+/* DIVISIÓN — solo asistentes */
+function getAttendingPlayers(){return S.players.filter(p=>p.asiste!==false)}
+
+function splitBalanced(){
+  const attending=getAttendingPlayers();
+  if(attending.length<2){
+    alert('Se necesitan al menos 2 jugadores con asistencia marcada.');return;
+  }
+  const sc=getSlotCount();
+  const all=attending.map(p=>({...p,global:calcGlobal(p)})).sort((a,b)=>b.global-a.global);
+  const used=new Set();const expls=[];
+  const nt=emptyTeams();
+  const byQ=[...all].sort((a,b)=>b.Q-a.Q);
+  if(byQ[0]){nt.A.gk=byQ[0].id;used.add(byQ[0].id);expls.push({team:'A',player:byQ[0],pos:'Arquero',reason:'Mejor stat arquero: '+byQ[0].Q})}
+  if(byQ[1]){nt.B.gk=byQ[1].id;used.add(byQ[1].id);expls.push({team:'B',player:byQ[1],pos:'Arquero',reason:'2° mejor arquero: '+byQ[1].Q})}
+  let sumA=nt.A.gk?calcGlobal(playerById(nt.A.gk)):0;
+  let sumB=nt.B.gk?calcGlobal(playerById(nt.B.gk)):0;
+  POS_KEYS.forEach(row=>{
+    const cnt=sc[row];
+    for(let i=0;i<cnt*2;i++){
+      const cands=all.filter(p=>!used.has(p.id)).sort((a,b)=>calcScore(b,row)-calcScore(a,row));
+      if(!cands.length)break;
+      const p=cands[0];const team=sumA<=sumB?'A':'B';
+      nt[team].slots[row].push(p.id);
+      if(team==='A')sumA+=p.global;else sumB+=p.global;
+      used.add(p.id);
+      expls.push({team,player:p,pos:POS_LABELS[row],reason:'Score '+calcScore(p,row)+' en '+POS_LABELS[row]+', global '+p.global});
+    }
+  });
+  const subs=all.filter(p=>!used.has(p.id)).map(p=>p.id);
+  const half=Math.ceil(subs.length/2);
+  nt.A.subs=subs.slice(0,half);nt.B.subs=subs.slice(half);
+  S.teams=nt;S.hasSplit=true;S.view='field';S.explanation=expls;S.kickoff=null;S.gkRotation={A:[],B:[]};
+
+  // Crear partido automático si no hay uno activo
+  if(!S.currentMatchId){
+    const mid=genId();
+    S.matches.push({id:mid,date:new Date().toISOString(),score:{A:0,B:0}});
+    S.currentMatchId=mid;
+    saveStorage();
+  }
+  render();
+}
+
+/* MONEDA */
+function launchCoin(){
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';overlay.id='modal-overlay';
+  overlay.innerHTML=`<div class="modal-box" style="max-width:340px;text-align:center">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="text-align:center">Lanzar moneda</div>
+    <div style="padding:20px 0 16px">
+      <div class="coin coin-spinning" id="coin-el" style="background:#B8860B;border-color:#8a6500;color:#fff">🪙</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:14px" id="coin-status">Lanzando...</div>
+    </div>
+    <div id="coin-result-area" style="min-height:50px"></div>
+    <div class="modal-actions" style="justify-content:center;margin-top:8px">
+      <button onclick="closeModal()" class="btn-sm">Cerrar</button>
+      <button class="btn-gold btn-sm" onclick="closeModal();launchCoin()">Relanzar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal()});
+  let spins=0;
+  const winner=Math.random()<0.5?'A':'B';
+  const tc=TEAM_COLORS[winner];
+  const interval=setInterval(()=>{
+    spins++;
+    const el=document.getElementById('coin-el');
+    if(el)el.textContent=spins%2===0?'🪙':'⚽';
+    if(spins>=12){
+      clearInterval(interval);
+      const el2=document.getElementById('coin-el');
+      const st=document.getElementById('coin-status');
+      const ra=document.getElementById('coin-result-area');
+      if(!el2)return;
+      el2.className='coin coin-result';
+      el2.style.background=tc.main;el2.style.borderColor=tc.dark;el2.style.color='#fff';el2.textContent='⚽';
+      if(st)st.textContent='';
+      if(ra)ra.innerHTML=`<div style="font-size:20px;font-weight:700;color:${tc.main};margin-bottom:4px">¡Equipo ${tc.name}!</div><div style="font-size:13px;color:var(--text2)">comienza con la pelota</div>`;
+      S.kickoff=winner;
+      setTimeout(()=>render(),200);
+    }
+  },120);
+}
+
+/* ARQUERO ALEATORIO */
+function randomGKRotation(teamKey){
+  const team=S.teams[teamKey];
+  const allIds=[...new Set([...(team.slots.A||[]),...(team.slots.M||[]),...(team.slots.T||[]),...(team.gk?[team.gk]:[]),...(team.subs||[])].filter(Boolean))];
+  if(!allIds.length){alert('No hay jugadores en el equipo '+TEAM_COLORS[teamKey].name);return}
+  const shuffled=shuffle(allIds);
+  S.gkRotation[teamKey]=shuffled;
+  const newGkId=shuffled[0];
+  const oldGkId=S.teams[teamKey].gk;
+  if(newGkId!==oldGkId){
+    let newGkRow=null,newGkIdx=null;
+    ['A','M','T'].forEach(row=>{(S.teams[teamKey].slots[row]||[]).forEach((id,i)=>{if(id===newGkId){newGkRow=row;newGkIdx=i;}})});
+    if(newGkRow!==null){
+      if(oldGkId)S.teams[teamKey].slots[newGkRow][newGkIdx]=oldGkId;
+      else S.teams[teamKey].slots[newGkRow][newGkIdx]=null;
+    }
+    if(oldGkId&&newGkRow!==null)S.teams[teamKey].subs=S.teams[teamKey].subs.filter(id=>id!==oldGkId);
+    S.teams[teamKey].subs=S.teams[teamKey].subs.filter(id=>id!==newGkId);
+  }
+  S.teams[teamKey].gk=newGkId;
+  const tc=TEAM_COLORS[teamKey];
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';overlay.id='modal-overlay';
+  const rotation=shuffled;
+  const items=rotation.map((id,i)=>{
+    const p=playerById(id);if(!p)return'';
+    const g=calcGlobal(p);
+    return`<div class="rotation-item">
+      <div class="rotation-num${i===0?' first':''}">${i+1}</div>
+      <div class="chip-avatar" style="background:${getAvatarColor(p.id)};width:26px;height:26px;font-size:9px;flex-shrink:0">${getInitials(p.n)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:12px">${esc(p.n)}${p.d?` <span style="color:var(--text3)">#${p.d}</span>`:''}</div>
+        <div style="font-size:10px;color:var(--text2)">Global <span style="font-weight:700;color:${getGlobalColor(g)}">${g}</span> · Arq=${p.Q}</div>
+      </div>
+      ${i===0?`<span style="background:${tc.main};color:#fff;border-radius:10px;padding:2px 7px;font-size:9px;font-weight:700">ARQ inicial</span>`:`<span style="font-size:10px;color:var(--text3)">Turno ${i+1}</span>`}
+    </div>`;
+  }).join('');
+  overlay.innerHTML=`<div class="modal-box" style="max-width:400px">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${tc.main};margin-right:6px;vertical-align:middle"></span>Rotación arqueros — Equipo ${tc.name}</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Orden aleatorio. El primero va al arco primero.</div>
+    <div style="border:0.5px solid var(--border1);border-radius:var(--radius-md);overflow:hidden;margin-bottom:4px">
+      <div style="background:var(--bg2);padding:7px 10px;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">Orden de rotación</div>
+      <div style="padding:4px 10px">${items}</div>
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeModal()" class="btn-sm">Cerrar</button>
+      <button class="btn-blue btn-sm" onclick="closeModal();randomGKRotation('${teamKey}')">Regenerar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal()});
+  render();
+}
+
+/* DRAG & DROP */
+function handleSlotDragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over')}
+function handleSlotDragLeave(e){e.currentTarget.classList.remove('drag-over')}
+function handleSlotDrop(e,team,row,idx){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  const pid=S.dragPid;if(!pid)return;
+  removePlayerFromAllSlots(pid);
+  const slots=S.teams[team].slots[row];
+  while(slots.length<=idx)slots.push(null);
+  slots[idx]=pid;S.dragPid=null;S.dragFrom=null;render();
+}
+function handleGKDrop(e,team){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  const pid=S.dragPid;if(!pid)return;
+  removePlayerFromAllSlots(pid);S.teams[team].gk=pid;S.dragPid=null;S.dragFrom=null;render();
+}
+function handleSubsDrop(e,team){
+  e.preventDefault();
+  const pid=S.dragPid;if(!pid)return;
+  removePlayerFromAllSlots(pid);S.teams[team].subs.push(pid);S.dragPid=null;S.dragFrom=null;render();
+}
+function removePlayerFromAllSlots(pid){
+  ['A','B'].forEach(t=>{
+    POS_KEYS.forEach(r=>{S.teams[t].slots[r]=S.teams[t].slots[r].map(x=>x===pid?null:x)});
+    S.teams[t].subs=S.teams[t].subs.filter(x=>x!==pid);
+    if(S.teams[t].gk===pid)S.teams[t].gk=null;
+  });
+}
+function removeFromSlot(team,row,idx){S.teams[team].slots[row][idx]=null;render()}
+function removeGK(team){S.teams[team].gk=null;render()}
+function removeFromSubs(team,pid){S.teams[team].subs=S.teams[team].subs.filter(x=>x!==pid);render()}
+
+/* MODAL JUGADOR */
+function openModal(player){
+  const isEdit=!!player;
+  const p=player?{...player}:{id:'p'+Date.now(),n:'',d:'',A:60,M:60,T:60,Q:20,pos:'M',pie:'Der',notas:'',asiste:true};
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';overlay.id='modal-overlay';
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal()});
+  overlay.innerHTML=`<div class="modal-box" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+    <div class="modal-title">${isEdit?'Editar jugador':'Nuevo jugador'}</div>
+    <div class="form-grid-2">
+      <div class="form-row"><label>Nombre *</label><input id="fn" value="${esc(p.n)}" placeholder="Nombre completo" autocomplete="off"></div>
+      <div class="form-row"><label>Dorsal</label><input id="fd" value="${esc(p.d||'')}" type="number" min="1" max="99" placeholder="#"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-row"><label>Posición preferida</label><select id="fp">
+        <option value="A"${p.pos==='A'?' selected':''}>Adelante</option>
+        <option value="M"${p.pos==='M'?' selected':''}>Medio</option>
+        <option value="T"${p.pos==='T'?' selected':''}>Atrás</option>
+      </select></div>
+      <div class="form-row"><label>Pie dominante</label><select id="fpie">
+        <option${p.pie==='Der'?' selected':''}>Der</option>
+        <option${p.pie==='Zur'?' selected':''}>Zur</option>
+        <option${p.pie==='Amb'?' selected':''}>Amb</option>
+      </select></div>
+    </div>
+    <div class="form-row" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg2);border-radius:var(--radius-md)">
+      <div>
+        <div style="font-size:13px;font-weight:600">Asiste al partido</div>
+        <div style="font-size:11px;color:var(--text2)">Solo los que asisten entran en la división</div>
+      </div>
+      <label class="toggle" style="flex-shrink:0">
+        <input type="checkbox" id="fasiste" ${p.asiste!==false?'checked':''}>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="stat-section" style="margin-top:10px">
+      <div class="section-title">Estadísticas (0–100)</div>
+      ${[['A','Adelante','#378ADD'],['M','Medio','#1D9E75'],['T','Atrás','#BA7517'],['Q','Arquero','#EF9F27']].map(([k,l,c])=>`
+      <div class="stat-row">
+        <label>${l}</label>
+        <input type="range" min="0" max="100" step="1" value="${p[k]}" id="fs${k}" style="accent-color:${c}" oninput="document.getElementById('sv${k}').textContent=this.value">
+        <span class="stat-val" id="sv${k}">${p[k]}</span>
+      </div>`).join('')}
+    </div>
+    <div class="form-row"><label>Notas</label><textarea id="fnt" rows="2" style="resize:none">${esc(p.notas||'')}</textarea></div>
+    <div class="modal-actions">
+      ${isEdit?`<button class="btn-red btn-sm" id="btn-del">Eliminar</button>`:''}
+      <button class="btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn-blue btn-sm" id="btn-save">Guardar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('btn-save').addEventListener('click',()=>savePlayer(p.id,isEdit));
+  if(isEdit){
+    document.getElementById('btn-del').addEventListener('click',()=>{
+      if(confirm('¿Eliminar a "'+p.n+'"? No se puede deshacer.')){
+        S.players=S.players.filter(x=>x.id!==p.id);
+        removePlayerFromAllSlots(p.id);
+        saveStorage();closeModal();render();
+      }
+    });
+  }
+  setTimeout(()=>{const fn=document.getElementById('fn');if(fn)fn.focus()},60);
+}
+
+function savePlayer(id,isEdit){
+  const n=document.getElementById('fn').value.trim();
+  if(!n){alert('El nombre es obligatorio');return}
+  const asiste=document.getElementById('fasiste').checked;
+  const p={id,n,d:document.getElementById('fd').value,
+    A:parseInt(document.getElementById('fsA').value),M:parseInt(document.getElementById('fsM').value),
+    T:parseInt(document.getElementById('fsT').value),Q:parseInt(document.getElementById('fsQ').value),
+    pos:document.getElementById('fp').value,pie:document.getElementById('fpie').value,
+    notas:document.getElementById('fnt').value,asiste};
+  if(isEdit)S.players=S.players.map(x=>x.id===id?p:x);
+  else S.players.push(p);
+  saveStorage();closeModal();render();
+}
+function closeModal(){const o=document.getElementById('modal-overlay');if(o)o.remove()}
+
+/* =========== ESTADÍSTICAS / GOLES =========== */
+
+function getMatchGoals(matchId){return S.goals.filter(g=>g.matchId===matchId)}
+function getMatchScore(matchId){
+  const goals=getMatchGoals(matchId);
+  const score={A:0,B:0};
+  goals.forEach(g=>{
+    // Determinar equipo del jugador en ese partido
+    const match=S.matches.find(m=>m.id===matchId);
+    if(match&&match.teamSnapshot){
+      const teamA=match.teamSnapshot.A||[];
+      const teamB=match.teamSnapshot.B||[];
+      if(teamA.includes(g.playerId))score.A++;
+      else if(teamB.includes(g.playerId))score.B++;
+    } else {
+      // Fallback: usar equipos actuales
+      const idsA=getAllTeamIds('A');
+      const idsB=getAllTeamIds('B');
+      if(idsA.has(g.playerId))score.A++;
+      else if(idsB.has(g.playerId))score.B++;
+    }
+  });
+  return score;
+}
+function getAllTeamIds(team){
+  const ids=new Set();
+  POS_KEYS.forEach(r=>(S.teams[team].slots[r]||[]).forEach(id=>id&&ids.add(id)));
+  if(S.teams[team].gk)ids.add(S.teams[team].gk);
+  S.teams[team].subs.forEach(id=>ids.add(id));
+  return ids;
+}
+function getPlayerGoalsInMatch(pid,matchId){return S.goals.filter(g=>g.playerId===pid&&g.matchId===matchId).length}
+function getPlayerTotalGoals(pid){return S.goals.filter(g=>g.playerId===pid).length}
+
+function openGoalModal(){
+  // Pool: si hay equipos armados usarlos, si no todos los jugadores
+  const idsA=getAllTeamIds('A');
+  const idsB=getAllTeamIds('B');
+  const allInIds=new Set([...idsA,...idsB]);
+  const poolPlayers=allInIds.size>0?S.players.filter(p=>allInIds.has(p.id)):S.players;
+
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';overlay.id='modal-overlay';
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal()});
+
+  const playerOpts=poolPlayers.map(p=>{
+    const team=idsA.has(p.id)?'Azul':idsB.has(p.id)?'Rojo':'';
+    return`<option value="${p.id}">${esc(p.n)}${team?' ('+team+')':''}${p.d?' #'+p.d:''}</option>`;
+  }).join('');
+
+  overlay.innerHTML=`<div class="modal-box" style="max-width:380px" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚽ Registrar gol</div>
+    <div class="error-msg" id="goal-error"></div>
+    <div class="form-row">
+      <label>Jugador *</label>
+      <select id="g-player" style="font-size:15px;padding:10px;min-height:44px">
+        <option value="">— Seleccioná un jugador —</option>${playerOpts}
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn-blue" id="btn-save-goal" style="min-height:48px;font-size:15px;flex:1">Guardar gol ⚽</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('btn-save-goal').addEventListener('click',()=>{
+    const errEl=document.getElementById('goal-error');
+    const pid=document.getElementById('g-player').value;
+    if(!pid){
+      errEl.textContent='Seleccioná un jugador antes de guardar.';errEl.classList.add('show');return;
+    }
+    const goal={id:genId(),playerId:pid,createdAt:new Date().toISOString()};
+    S.goals.push(goal);
+    saveStorage();
+    closeModal();
+    if(S.view==='stats')render();
+    else showToast('¡Gol registrado! ⚽');
+  });
+}
+
+function deleteGoal(gid){
+  if(!confirm('¿Eliminar este gol?'))return;
+  S.goals=S.goals.filter(g=>g.id!==gid);
+  saveStorage();render();
+}
+
+function newMatch(){
+  const mid=genId();
+  S.matches.push({id:mid,date:new Date().toISOString(),score:{A:0,B:0}});
+  S.currentMatchId=mid;
+  saveStorage();render();
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1c1c1e;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;z-index:2000;pointer-events:none;opacity:0;transition:opacity .2s';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>{t.style.opacity='1';setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),250)},1800)});
+}
+
+/* GUARDAR / CARGAR */
+function saveTeam(){
+  const name=prompt('Nombre para guardar el equipo:');if(!name)return;
+  S.savedTeams.push({id:'t'+Date.now(),name,mode:S.mode,teams:JSON.parse(JSON.stringify(S.teams)),date:new Date().toLocaleDateString('es-AR')});
+  saveStorage();showToast('Equipo guardado ✓');render();
+}
+function loadSaved(t){S.mode=t.mode;S.teams=t.teams;S.hasSplit=true;S.view='field';S.explanation=[];S.kickoff=null;S.gkRotation={A:[],B:[]};render()}
+function deleteSaved(id){S.savedTeams=S.savedTeams.filter(x=>x.id!==id);saveStorage();render()}
+
+/* RENDER CANCHA */
+function renderFieldForTeam(teamKey){
+  const team=S.teams[teamKey];
+  const sc=getSlotCount();
+  const tc=TEAM_COLORS[teamKey];
+  const isKickoff=S.kickoff===teamKey;
+  const rotation=S.gkRotation[teamKey]||[];
+
+  const rowsHtml=POS_KEYS.map(row=>{
+    const cnt=sc[row];const ids=team.slots[row]||[];
+    const slotsHtml=Array.from({length:cnt},(_,i)=>{
+      const pid=ids[i];
+      const p=(pid&&pid!==team.gk)?playerById(pid):null;
+      if(p){
+        const g=calcGlobal(p);const rotIdx=rotation.indexOf(p.id);
+        return`<div class="player-slot occupied" style="border-color:${tc.main};background:${tc.main}28"
+          ondragover="handleSlotDragOver(event)" ondragleave="handleSlotDragLeave(event)"
+          ondrop="handleSlotDrop(event,'${teamKey}','${row}',${i})">
+          <button class="chip-remove" onclick="removeFromSlot('${teamKey}','${row}',${i})">×</button>
+          <div class="player-chip" draggable="true" ondragstart="S.dragPid='${p.id}';S.dragFrom={team:'${teamKey}',row:'${row}',idx:${i}}">
+            <div class="chip-avatar" style="background:${getAvatarColor(p.id)}">${getInitials(p.n)}</div>
+            <div class="chip-name">${p.n.split(' ')[0]}${p.d?' #'+p.d:''}</div>
+            <div class="chip-global" style="color:${getGlobalColor(g)}">${g}</div>
+            ${rotIdx>0?`<div class="chip-rotation">Arq. T${rotIdx+1}</div>`:''}
+          </div>
+        </div>`;
+      }
+      return`<div class="player-slot" ondragover="handleSlotDragOver(event)" ondragleave="handleSlotDragLeave(event)"
+        ondrop="handleSlotDrop(event,'${teamKey}','${row}',${i})">
+        <span style="font-size:9px;color:rgba(255,255,255,0.28)">${POS_LABELS[row]}</span>
+      </div>`;
+    }).join('');
+    return`<div class="field-row"><div class="field-row-label">${POS_LABELS[row]}</div>${slotsHtml}</div>`;
+  }).join('');
+
+  const gkp=team.gk?playerById(team.gk):null;
+  const gkHtml=`<div class="field-row"><div class="field-row-label">Arq.</div>
+    <div class="player-slot${gkp?' occupied':''}" style="${gkp?'border-color:#EF9F27;background:#EF9F2722':'border-color:rgba(255,200,0,0.25)'}"
+      ondragover="handleSlotDragOver(event)" ondragleave="handleSlotDragLeave(event)"
+      ondrop="handleGKDrop(event,'${teamKey}')">
+      ${gkp?`
+        <button class="chip-remove" onclick="removeGK('${teamKey}')">×</button>
+        <div class="player-chip" draggable="true" ondragstart="S.dragPid='${gkp.id}';S.dragFrom={team:'${teamKey}',row:'GK',idx:0}">
+          <div class="chip-avatar" style="background:#854F0B">${getInitials(gkp.n)}</div>
+          <div class="chip-name">${gkp.n.split(' ')[0]}${gkp.d?' #'+gkp.d:''}</div>
+          <div class="chip-gk-badge">ARQ</div>
+          <div class="chip-global">${calcGlobal(gkp)}</div>
+        </div>`:`<span style="font-size:9px;color:rgba(255,200,0,0.38)">Arquero</span>`}
+    </div>
+  </div>`;
+
+  const subsHtml=`<div class="subs-section" ondragover="event.preventDefault()" ondrop="handleSubsDrop(event,'${teamKey}')">
+    <div style="font-size:9px;color:rgba(255,255,255,0.38);margin-bottom:3px">Suplentes${team.subs.length===0?' — arrastrá aquí':''}</div>
+    ${team.subs.map(id=>{const p=playerById(id);return p?`<span class="sub-chip" draggable="true" ondragstart="S.dragPid='${p.id}';S.dragFrom={team:'${teamKey}',row:'SUB',idx:-1}" onclick="removeFromSubs('${teamKey}','${p.id}')">${p.n.split(' ')[0]}</span>`:''}).join('')}
+  </div>`;
+
+  const rotBar=rotation.length>1?`<div style="border-top:0.5px solid rgba(255,255,255,0.1);margin-top:5px;padding-top:5px">
+    <div style="font-size:9px;color:rgba(255,255,255,0.38);margin-bottom:3px">Rotación arq.:</div>
+    <div style="display:flex;flex-wrap:wrap;gap:3px">
+      ${rotation.map((id,i)=>{const p=playerById(id);return p?`<span style="background:${i===0?'rgba(239,159,39,0.7)':'rgba(255,255,255,0.1)'};border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;padding:1px 7px;font-size:9px;color:${i===0?'#412402':'rgba(255,255,255,0.75)'}">${i+1}. ${p.n.split(' ')[0]}</span>`:''}).join('')}
+    </div>
+  </div>`:'';
+
+  return`<div class="field-wrap">
+    <div class="field-header" style="background:${tc.main}">
+      <span style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+        Equipo ${tc.name} — ${S.mode}
+        ${isKickoff?`<span style="background:rgba(255,200,0,0.9);color:#412402;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:700">⚽ saque</span>`:''}
+      </span>
+      <span style="display:flex;align-items:center;gap:5px">
+        <button style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3);font-size:10px;padding:3px 8px;min-height:26px" onclick="randomGKRotation('${teamKey}')">Arq. al azar</button>
+        <span style="font-size:11px;opacity:0.85">G:${getTeamSum(teamKey)}</span>
+      </span>
+    </div>
+    <div class="field-body">
+      <svg class="field-svg-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="50" y1="0" x2="50" y2="100" stroke="white" stroke-width="0.6"/>
+        <ellipse cx="50" cy="50" rx="18" ry="12" fill="none" stroke="white" stroke-width="0.6"/>
+        <rect x="28" y="0" width="44" height="18" fill="none" stroke="white" stroke-width="0.6"/>
+        <rect x="28" y="82" width="44" height="18" fill="none" stroke="white" stroke-width="0.6"/>
+        <rect x="38" y="0" width="24" height="9" fill="none" stroke="white" stroke-width="0.6"/>
+        <rect x="38" y="91" width="24" height="9" fill="none" stroke="white" stroke-width="0.6"/>
+      </svg>
+      <div class="field-rows">${rowsHtml}${gkHtml}</div>
+      ${subsHtml}${rotBar}
+    </div>
+  </div>`;
+}
+
+/* RENDER LISTA */
+function renderListView(){
+  const allIn=allInTeamIds();
+  return`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+    <table class="list-table">
+      <thead><tr>
+        <th style="width:26%">Jugador</th><th style="width:8%">Pos</th>
+        <th style="width:7%">Ade</th><th style="width:7%">Med</th><th style="width:7%">Atr</th><th style="width:7%">Arq</th>
+        <th style="width:8%">Glob</th><th style="width:8%">Equipo</th>
+        <th style="width:8%">Goles</th>
+        <th style="width:10%">Asiste</th>
+        <th style="width:10%"></th>
+      </tr></thead>
+      <tbody>
+        ${S.players.map(p=>{
+          const g=calcGlobal(p);
+          const inA=S.hasSplit&&[...(S.teams.A.slots.A||[]),...(S.teams.A.slots.M||[]),...(S.teams.A.slots.T||[]),S.teams.A.gk,...S.teams.A.subs].filter(Boolean).includes(p.id);
+          const inB=S.hasSplit&&!inA&&allIn.has(p.id);
+          const goals=getPlayerTotalGoals(p.id);
+          return`<tr style="${p.asiste===false?'opacity:0.5':''}">
+            <td><div style="display:flex;align-items:center;gap:5px">
+              <div class="chip-avatar" style="background:${getAvatarColor(p.id)};width:22px;height:22px;font-size:9px;flex-shrink:0">${getInitials(p.n)}</div>
+              <span style="font-weight:600;font-size:11px">${esc(p.n)}</span>
+            </div></td>
+            <td>${POS_LABELS[p.pos]||p.pos}</td>
+            <td>${p.A}</td><td>${p.M}</td><td>${p.T}</td><td>${p.Q}</td>
+            <td><span style="font-weight:700;color:${getGlobalColor(g)}">${g}</span></td>
+            <td>${inA?`<span class="tag" style="background:var(--blue-l);color:var(--blue-d)">Azul</span>`:inB?`<span class="tag" style="background:var(--red-l);color:var(--red-d)">Rojo</span>`:'-'}</td>
+            <td><span style="font-weight:700;color:${goals>0?'var(--blue)':'var(--text3)'}">${goals}</span></td>
+            <td>
+              <label class="toggle" title="${p.asiste!==false?'Asiste':'No asiste'}">
+                <input type="checkbox" ${p.asiste!==false?'checked':''} onchange="toggleAsiste('${p.id}')">
+                <span class="toggle-slider"></span>
+              </label>
+            </td>
+            <td><button class="btn-sm" onclick="openModal(S.players.find(x=>x.id==='${p.id}'))">Editar</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+/* RENDER ESTADÍSTICAS */
+function openGoalModalFor(pid){
+  openGoalModal();
+  setTimeout(()=>{const el=document.getElementById('g-player');if(el)el.value=pid;},50);
+}
+function renderStatsView(){
+  const totalGoals=S.goals.length;
+  const topScorer=S.players.map(p=>({p,g:getPlayerTotalGoals(p.id)})).sort((a,b)=>b.g-a.g)[0];
+  const attending=getAttendingPlayers();
+  const all=S.players.map(p=>({p,goals:getPlayerTotalGoals(p.id)})).sort((a,b)=>b.goals-a.goals);
+  return`<div class="stats-section">
+    <div class="metrics-row" style="grid-template-columns:repeat(2,1fr)">
+      <div class="metric-card"><div class="metric-label">Goles totales</div><div class="metric-val" style="color:var(--blue)">${totalGoals}</div></div>
+      <div class="metric-card"><div class="metric-label">Asistentes</div><div class="metric-val" style="color:var(--green)">${attending.length}</div></div>
+    </div>
+    ${topScorer&&topScorer.g>0?`<div style="background:var(--bg2);border-radius:var(--radius-md);padding:10px;border:0.5px solid var(--border1);display:flex;align-items:center;gap:10px">
+      <span style="font-size:28px">\u{1F3C6}</span>
+      <div>
+        <div style="font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.05em">Goleador</div>
+        <div style="font-size:16px;font-weight:700">${esc(topScorer.p.n)}</div>
+        <div style="font-size:12px;color:var(--blue);font-weight:700">${topScorer.g} gol${topScorer.g!==1?'es':''}</div>
+      </div>
+    </div>`:''}
+    <div class="player-stats-card">
+      <div class="section-title">Goles por jugador</div>
+      ${all.map((x,i)=>`<div class="player-stats-row">
+        <div style="width:20px;font-size:10px;color:var(--text3);flex-shrink:0">${i+1}</div>
+        <div class="chip-avatar" style="background:${getAvatarColor(x.p.id)};width:26px;height:26px;font-size:9px;flex-shrink:0">${getInitials(x.p.n)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:12px">${esc(x.p.n)}${x.p.d?` <span style="color:var(--text3)">#${x.p.d}</span>`:''}</div>
+          <div style="font-size:10px;color:var(--text2)">${POS_LABELS[x.p.pos]}</div>
+        </div>
+        <div class="player-stats-goals" style="color:${x.goals>0?'var(--blue)':'var(--text3)'}">${x.goals}</div>
+        <button class="btn-sm btn-blue" onclick="openGoalModalFor('${x.p.id}')" style="min-height:36px;font-size:12px;padding:5px 10px">+ Gol</button>
+      </div>`).join('')}
+    </div>
+    <button class="add-goal-btn" onclick="openGoalModal()">\u26BD Registrar gol</button>
+  </div>`;
+}
+
+/* RENDER SIDEBAR */
+function renderSidebar(){
+  let fp=S.players.filter(p=>p.n.toLowerCase().includes(S.search.toLowerCase())&&(!S.posFilter||p.pos===S.posFilter));
+  if(S.attendFilter==='asiste')fp=fp.filter(p=>p.asiste!==false);
+  else if(S.attendFilter==='noasiste')fp=fp.filter(p=>p.asiste===false);
+  const allIn=allInTeamIds();
+  const attendingCount=getAttendingPlayers().length;
+  return`<div class="sidebar">
+    <div class="sidebar-header">
+      <span style="font-size:11px;font-weight:700">${S.players.length} jugadores <span style="color:var(--green)">·${attendingCount} ✓</span></span>
+      <button class="btn-blue btn-sm" onclick="openModal()">+ Nuevo</button>
+    </div>
+    <div class="sidebar-filters">
+      <input placeholder="Buscar..." value="${esc(S.search)}" oninput="S.search=this.value;renderSidebarOnly()">
+      <select oninput="S.posFilter=this.value;renderSidebarOnly()">
+        <option value="">Todas las posiciones</option>
+        <option value="A"${S.posFilter==='A'?' selected':''}>Adelante</option>
+        <option value="M"${S.posFilter==='M'?' selected':''}>Medio</option>
+        <option value="T"${S.posFilter==='T'?' selected':''}>Atrás</option>
+      </select>
+      <select oninput="S.attendFilter=this.value;renderSidebarOnly()">
+        <option value="all"${S.attendFilter==='all'?' selected':''}>Todos</option>
+        <option value="asiste"${S.attendFilter==='asiste'?' selected':''}>Solo asisten</option>
+        <option value="noasiste"${S.attendFilter==='noasiste'?' selected':''}>No asisten</option>
+      </select>
+    </div>
+    <div class="sidebar-body" id="sidebar-list">
+      ${fp.length===0?'<div style="padding:20px;text-align:center;color:var(--text3)">Sin resultados</div>':
+        fp.map(p=>{
+          const g=calcGlobal(p);
+          const inA=allIn.has(p.id)&&S.teams.A&&[...(S.teams.A.slots.A||[]),...(S.teams.A.slots.M||[]),...(S.teams.A.slots.T||[]),S.teams.A.gk,...S.teams.A.subs].filter(Boolean).includes(p.id);
+          const inB=allIn.has(p.id)&&!inA;
+          const noAsiste=p.asiste===false;
+          return`<div class="pcard${allIn.has(p.id)?' in-team':''}${noAsiste?' no-asiste':''}">
+            <div class="pcard-row">
+              <div class="chip-avatar" style="background:${getAvatarColor(p.id)};width:28px;height:28px;font-size:10px;flex-shrink:0;cursor:pointer" onclick="openModal(S.players.find(x=>x.id==='${p.id}'))">${getInitials(p.n)}</div>
+              <div style="flex:1;min-width:0;cursor:pointer" onclick="openModal(S.players.find(x=>x.id==='${p.id}'))">
+                <div class="pcard-name">${esc(p.n)}${p.d?` <span style="color:var(--text3);font-weight:400">#${p.d}</span>`:''}</div>
+                <div class="pcard-meta">${POS_LABELS[p.pos]} · G <span style="font-weight:700;color:${getGlobalColor(g)}">${g}</span>
+                  ${inA?'<span class="tag" style="background:var(--blue-l);color:var(--blue-d);margin-left:2px">A</span>':''}
+                  ${inB?'<span class="tag" style="background:var(--red-l);color:var(--red-d);margin-left:2px">R</span>':''}
+                </div>
+              </div>
+              <label class="toggle" title="${noAsiste?'No asiste — tocá para activar':'Asiste — tocá para desactivar'}" style="flex-shrink:0" onclick="event.stopPropagation()">
+                <input type="checkbox" ${!noAsiste?'checked':''} onchange="toggleAsiste('${p.id}')">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="global-bar-wrap"><div class="global-bar" style="width:${g}%;background:${getGlobalColor(g)}"></div></div>
+          </div>`;
+        }).join('')}
+    </div>
+  </div>`;
+}
+function renderSidebarOnly(){const el=document.querySelector('.sidebar');if(!el)return;const t=document.createElement('div');t.innerHTML=renderSidebar();el.replaceWith(t.firstChild)}
+function renderContentOnly(){const el=document.querySelector('.content');if(!el)return;const t=document.createElement('div');t.innerHTML=renderContent();el.replaceWith(t.firstChild)}
+
+/* RENDER CONTENIDO */
+function renderContent(){
+  const sumA=getTeamSum('A'),sumB=getTeamSum('B');
+  const diff=Math.abs(sumA-sumB);
+  const hasTeams=S.hasSplit||S.teams.A.gk||(S.teams.A.slots.A||[]).length>0;
+  const attending=getAttendingPlayers();
+
+  const metricsHtml=hasTeams&&S.view==='field'?`
+    <div class="metrics-row">
+      <div class="metric-card"><div class="metric-label">Equipo Azul</div><div class="metric-val" style="color:var(--blue)">${sumA}</div></div>
+      <div class="metric-card"><div class="metric-label">Equipo Rojo</div><div class="metric-val" style="color:var(--red)">${sumB}</div></div>
+      <div class="metric-card"><div class="metric-label">Diferencia</div><div class="metric-val" style="color:${diff>20?'var(--red)':diff>10?'var(--amber)':'var(--green)'}">${diff}</div></div>
+      <div class="metric-card"><div class="metric-label">Balance</div><div class="metric-val" style="font-size:13px;color:${diff<=5?'var(--green)':diff<=15?'var(--amber)':'var(--red)'}">${diff<=5?'Excelente':diff<=15?'Bueno':diff<=25?'Aceptable':'Desigual'}</div></div>
+    </div>
+    ${S.kickoff?`<div style="background:${TEAM_COLORS[S.kickoff].main}18;border:0.5px solid ${TEAM_COLORS[S.kickoff].main};border-radius:var(--radius-md);padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:22px">⚽</span>
+      <span><strong>Equipo ${TEAM_COLORS[S.kickoff].name}</strong> ganó el sorteo y comienza con la pelota.</span>
+    </div>`:''}
+    ${S.currentMatchId?`<button class="add-goal-btn" onclick="openGoalModal()">⚽ Registrar gol</button>`:''}
+    `:'';
+
+  let mainContent='';
+  if(S.view==='stats'){
+    mainContent=renderStatsView();
+  } else if(S.view==='field'&&hasTeams){
+    mainContent=`<div class="fields-grid">${renderFieldForTeam('A')}${renderFieldForTeam('B')}</div>`;
+  }else if(S.view==='list'){
+    mainContent=renderListView();
+  }else{
+    const noAttend=attending.length<2;
+    mainContent=`<div class="empty-state">
+      <div class="empty-icon">⚽</div>
+      <div style="font-size:14px;margin-bottom:6px;color:var(--text2)">Sin equipos armados</div>
+      ${noAttend?`<div style="font-size:12px;color:var(--red)">Solo hay ${attending.length} jugador(es) con asistencia. Necesitás al menos 2.</div>`
+      :`<div style="font-size:12px">${attending.length} jugadores asisten. Tocá "2 equipos" para comenzar.</div>`}
+    </div>`;
+  }
+
+  const explHtml=S.explanation.length>0&&S.view==='field'?`
+    <details style="border:0.5px solid var(--border1);border-radius:var(--radius-md);padding:10px">
+      <summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em">
+        Cómo se armaron los equipos (${S.explanation.length} asignaciones)
+      </summary>
+      <div style="margin-top:8px">
+        ${S.explanation.map(e=>`<div class="explain-item">
+          <span class="tag" style="background:${e.team==='A'?'var(--blue-l)':'var(--red-l)'};color:${e.team==='A'?'var(--blue-d)':'var(--red-d)'};flex-shrink:0">${e.team==='A'?'Azul':'Rojo'}</span>
+          <span style="font-weight:600">${esc(e.player.n)}</span>
+          <span style="color:var(--text3)">→ ${e.pos} · ${e.reason}</span>
+        </div>`).join('')}
+      </div>
+    </details>`:'';
+
+  const savedHtml=S.savedTeams.length>0?`
+    <div class="saved-row">
+      <span style="font-size:11px;color:var(--text2);flex-shrink:0">Guardados:</span>
+      ${S.savedTeams.slice().reverse().map(t=>`
+        <button class="btn-sm" onclick='loadSaved(${JSON.stringify(t)})'>${esc(t.name)} <span style="opacity:0.55;font-size:10px">${t.date}</span></button>
+        <button class="btn-sm" onclick="deleteSaved('${t.id}')" style="padding:3px 8px">×</button>`).join('')}
+    </div>`:'';
+
+  return`<div class="content">${metricsHtml}${mainContent}${explHtml}${savedHtml}</div>`;
+}
+
+/* RENDER PRINCIPAL */
+function render(){
+  const hasTeams=S.hasSplit||S.teams.A.gk||(S.teams.A.slots.A||[]).length>0;
+  document.getElementById('app').innerHTML=`
+    <div class="topbar">
+      <span class="topbar-title">⚽ FutbolApp</span>
+      <div style="display:flex;gap:4px">
+        <button class="mode-btn${S.mode==='F5'?' active':''}" onclick="S.mode='F5';render()">F5</button>
+        <button class="mode-btn${S.mode==='F7'?' active':''}" onclick="S.mode='F7';render()">F7</button>
+      </div>
+      <div class="desktop-only" style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+        <button class="btn-green" onclick="splitBalanced()">Dividir en 2 equipos</button>
+        ${hasTeams?`<button class="btn-gold" onclick="launchCoin()">Lanzar moneda 🪙</button>`:''}
+        <button class="btn-blue" onclick="openGoalModal()">+ Gol ⚽</button>
+        <button onclick="S.teams=emptyTeams();S.hasSplit=false;S.explanation=[];S.kickoff=null;S.gkRotation={A:[],B:[]};render()">Limpiar</button>
+        <button onclick="saveTeam()">Guardar...</button>
+      </div>
+      <div class="tab-row">
+        <div class="tab${S.view==='field'?' active':''}" onclick="S.view='field';render()">Cancha</div>
+        <div class="tab${S.view==='list'?' active':''}" onclick="S.view='list';render()">Lista</div>
+        <div class="tab${S.view==='stats'?' active':''}" onclick="S.view='stats';render()">Stats</div>
+      </div>
+    </div>
+    <div class="main">
+      ${renderSidebar()}
+      ${renderContent()}
+    </div>
+    <div class="mobile-bar">
+      <button class="btn-green" onclick="splitBalanced()">Dividir</button>
+      ${hasTeams?`<button class="btn-gold" onclick="launchCoin()">Moneda</button>`:''}
+      <button class="btn-blue" onclick="openGoalModal()">⚽ Gol</button>
+      ${hasTeams?`<button onclick="randomGKRotation('A')" style="font-size:10px">Arq.Azul</button>`:''}
+      ${hasTeams?`<button onclick="randomGKRotation('B')" style="font-size:10px">Arq.Rojo</button>`:''}
+      <button onclick="saveTeam()">Guardar</button>
+    </div>`;
+}
+
+render();
+</script>
+</body>
+</html>.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .mode-btn{padding:6px 10px;font-size:12px;border-radius:var(--radius-md);border:0.5px solid var(--border2);cursor:pointer;background:var(--bg1);color:var(--text1);min-height:32px}
 .mode-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .pcard{border:0.5px solid var(--border1);border-radius:var(--radius-md);padding:7px 9px;margin-bottom:5px;cursor:pointer;background:var(--bg1);transition:border-color .12s,opacity .12s;touch-action:manipulation}
